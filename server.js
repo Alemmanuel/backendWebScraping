@@ -12,7 +12,7 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Iniciar Puppeteer localmente sin Browserless
+        // Iniciar Puppeteer asegurando que descargue Chromium correctamente
         const browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -31,12 +31,12 @@ app.get("/api/search", async (req, res) => {
             return Array.from(document.querySelectorAll(".Nv2PK"))
                 .map(el => {
                     const nameEl = el.querySelector(".qBF1Pd") || el.querySelector("h3");
+                    const ratingEl = el.querySelector(".MW4etd");
                     const linkEl = el.querySelector("a");
-                    const ratingEl = el.querySelector(".MW4etd"); // Selector de la calificación
 
                     const name = nameEl ? nameEl.innerText.trim() : "No name available";
-                    const link = linkEl ? linkEl.href : "#";
                     const rating = ratingEl ? ratingEl.innerText.trim() : "No rating";
+                    const link = linkEl ? linkEl.href : "#";
 
                     return { name, rating, link };
                 })
