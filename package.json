@@ -1,11 +1,11 @@
 {
   "name": "backend-webscraping",
   "version": "1.0.0",
-  "description": "Backend for web scraping with Puppeteer using Google Chrome",
+  "description": "Backend for web scraping with Puppeteer",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && dpkg -i /tmp/chrome.deb || true"
+    "postinstall": "npx puppeteer install"
   },
   "dependencies": {
     "express": "^4.21.2",

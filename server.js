@@ -12,9 +12,8 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Detectar la ruta de Google Chrome en Render
+        // Iniciar Puppeteer sin especificar un ejecutable externo
         const browser = await puppeteer.launch({
-            executablePath: process.env.GOOGLE_CHROME_BIN || "/opt/google/chrome/google-chrome",
             headless: "new",
             args: [
                 "--no-sandbox",
