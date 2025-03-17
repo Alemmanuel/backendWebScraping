@@ -1,10 +1,11 @@
 {
   "name": "backend-webscraping",
   "version": "1.0.0",
-  "description": "Backend for web scraping with Puppeteer",
+  "description": "Backend for web scraping with Puppeteer using Google Chrome",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "[ \"$(uname -s)\" = \"Linux\" ] && apt-get update && apt-get install -y google-chrome-stable || echo 'Skipping Chrome installation on non-Linux systems'"
   },
   "dependencies": {
     "express": "^4.21.2",

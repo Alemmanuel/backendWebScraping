@@ -12,8 +12,9 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Forzar Puppeteer a descargar Chromium automáticamente
+        // Configurar Puppeteer para usar Google Chrome en Render
         const browser = await puppeteer.launch({
+            executablePath: process.env.GOOGLE_CHROME_BIN || "/usr/bin/google-chrome-stable",
             headless: "new",
             args: [
                 "--no-sandbox",
