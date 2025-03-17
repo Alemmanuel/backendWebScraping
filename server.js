@@ -15,8 +15,9 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
+        // Usar Puppeteer sin `executablePath`
         const browser = await puppeteer.launch({
-            executablePath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
+            headless: "new",
             args: [
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -25,13 +26,13 @@ app.get("/api/search", async (req, res) => {
             ]
         });
 
-        const pageInstance = await browser.newPage();
+        const page = await browser.newPage();
         let searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(category)}+in+${encodeURIComponent(city)}`;
-        await pageInstance.goto(searchUrl, { waitUntil: "networkidle2" });
+        await page.goto(searchUrl, { waitUntil: "networkidle2" });
 
-        await autoScroll(pageInstance);
+        await autoScroll(page);
 
-        const places = await pageInstance.evaluate(() => {
+        const places = await page.evaluate(() => {
             return Array.from(document.querySelectorAll(".Nv2PK"))
                 .map(el => {
                     const nameEl = el.querySelector(".qBF1Pd") || el.querySelector("h3");
@@ -53,8 +54,8 @@ app.get("/api/search", async (req, res) => {
         res.json({ places });
 
     } catch (error) {
-        console.error("Error scraping:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("❌ Error scraping:", error);
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
 
