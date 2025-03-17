@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "[ \"$(uname -s)\" = \"Linux\" ] && apt-get update && apt-get install -y google-chrome-stable || echo 'Skipping Chrome installation on non-Linux systems'"
+    "postinstall": "wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && dpkg -i /tmp/chrome.deb || true"
   },
   "dependencies": {
     "express": "^4.21.2",

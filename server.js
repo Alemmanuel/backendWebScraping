@@ -12,9 +12,9 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Configurar Puppeteer para usar Google Chrome en Render
+        // Detectar la ruta de Google Chrome en Render
         const browser = await puppeteer.launch({
-            executablePath: process.env.GOOGLE_CHROME_BIN || "/usr/bin/google-chrome-stable",
+            executablePath: process.env.GOOGLE_CHROME_BIN || "/opt/google/chrome/google-chrome",
             headless: "new",
             args: [
                 "--no-sandbox",
