@@ -1,5 +1,5 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core"); // Usamos `puppeteer-core` en lugar de `puppeteer`
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,8 +12,9 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Asegurar que Puppeteer descargue su propio Chromium
+        // Usar Chrome ya instalado en Vercel
         const browser = await puppeteer.launch({
+            executablePath: "/usr/bin/google-chrome-stable",
             headless: "new",
             args: [
                 "--no-sandbox",
