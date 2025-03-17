@@ -1,70 +1,8 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
-const { execSync } = require("child_process");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Función para encontrar la ruta de Chromium/Chrome
-const findChromePath = () => {
-  try {
-    // Intenta encontrar Chromium usando which
-    const chromiumPath = execSync('which chromium').toString().trim();
-    console.log(`✅ Chromium encontrado en: ${chromiumPath}`);
-    return chromiumPath;
-  } catch (error) {
-    console.log("❌ Chromium no encontrado, buscando alternativas...");
-  }
-
-  try {
-    // Intenta encontrar chromium-browser
-    const chromiumBrowserPath = execSync('which chromium-browser').toString().trim();
-    console.log(`✅ Chromium Browser encontrado en: ${chromiumBrowserPath}`);
-    return chromiumBrowserPath;
-  } catch (error) {
-    console.log("❌ Chromium Browser no encontrado, buscando alternativas...");
-  }
-
-  try {
-    // Intenta encontrar Google Chrome
-    const chromePath = execSync('which google-chrome').toString().trim();
-    console.log(`✅ Google Chrome encontrado en: ${chromePath}`);
-    return chromePath;
-  } catch (error) {
-    console.log("❌ Google Chrome no encontrado, buscando alternativas...");
-  }
-
-  try {
-    // Intenta encontrar Google Chrome Stable
-    const chromeStablePath = execSync('which google-chrome-stable').toString().trim();
-    console.log(`✅ Google Chrome Stable encontrado en: ${chromeStablePath}`);
-    return chromeStablePath;
-  } catch (error) {
-    console.log("❌ Google Chrome Stable no encontrado");
-  }
-
-  // Ubicaciones comunes donde podría estar instalado
-  const commonPaths = [
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-    '/usr/bin/google-chrome',
-    '/usr/bin/google-chrome-stable',
-    '/snap/bin/chromium',
-    '/usr/local/bin/chromium',
-    '/usr/local/bin/chrome'
-  ];
-
-  const fs = require('fs');
-  for (const path of commonPaths) {
-    if (fs.existsSync(path)) {
-      console.log(`✅ Navegador encontrado en: ${path}`);
-      return path;
-    }
-  }
-
-  console.log("❌ No se encontró ningún navegador compatible");
-  return null;
-};
 
 app.get("/api/search", async (req, res) => {
     const { category, city } = req.query;
@@ -74,32 +12,19 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Buscar la ruta del navegador
-        const browserPath = findChromePath();
-        console.log(`Usando navegador en: ${browserPath || 'Ruta por defecto'}`);
-
-        // Configuración para lanzar el navegador
-        const launchOptions = {
+        console.log("Iniciando navegador...");
+        
+        // Usar la instalación de Chrome que hicimos en el script de build
+        const browser = await puppeteer.launch({
             headless: "new",
             args: [
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-gpu",
-                "--disable-dev-shm-usage",
-                "--single-process"
+                "--disable-dev-shm-usage"
             ]
-        };
-
-        // Solo especificar executablePath si encontramos un navegador
-        if (browserPath) {
-            launchOptions.executablePath = browserPath;
-        } else {
-            console.log("⚠️ No se encontró un navegador específico, usando la configuración por defecto");
-        }
-
-        // Lanzar el navegador
-        console.log("Iniciando navegador con opciones:", JSON.stringify(launchOptions));
-        const browser = await puppeteer.launch(launchOptions);
+        });
+        
         console.log("✅ Navegador iniciado correctamente");
         
         const page = await browser.newPage();
@@ -122,7 +47,6 @@ app.get("/api/search", async (req, res) => {
         await page.waitForTimeout(2000);
         
         const places = await page.evaluate(() => {
-            console.log("Evaluando contenido de la página...");
             const elements = document.querySelectorAll(".Nv2PK");
             console.log(`Encontrados ${elements.length} elementos`);
             
@@ -161,29 +85,12 @@ app.get("/", (req, res) => {
     res.send("API de búsqueda funcionando. Usa /api/search?category=restaurantes&city=Madrid para buscar.");
 });
 
-// Ruta para verificar la instalación de Chrome/Chromium
-app.get("/check-browser", (req, res) => {
-    try {
-        const browserPath = findChromePath();
-        if (browserPath) {
-            res.json({ 
-                status: "success", 
-                message: "Navegador encontrado", 
-                path: browserPath 
-            });
-        } else {
-            res.json({ 
-                status: "error", 
-                message: "No se encontró ningún navegador compatible" 
-            });
-        }
-    } catch (error) {
-        res.status(500).json({ 
-            status: "error", 
-            message: "Error al verificar el navegador", 
-            error: error.message 
-        });
-    }
+// Ruta para verificar la versión de Puppeteer
+app.get("/check-puppeteer", (req, res) => {
+    res.json({ 
+        puppeteer: require('puppeteer/package.json').version,
+        node: process.version
+    });
 });
 
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
