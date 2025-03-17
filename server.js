@@ -1,10 +1,10 @@
 const express = require("express");
-const puppeteer = require("puppeteer-core"); // Cambiado a puppeteer-core
+const puppeteer = require("puppeteer-core");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Función para encontrar el ejecutable de Chrome en diferentes ubicaciones comunes
+// Función para encontrar el ejecutable de Chrome
 const findChrome = () => {
   // Ubicaciones comunes de Chrome en entornos Linux (como Render)
   const paths = [
@@ -12,7 +12,6 @@ const findChrome = () => {
     '/usr/bin/google-chrome-stable',
     '/usr/bin/chromium',
     '/usr/bin/chromium-browser',
-    // Añade más rutas si es necesario
   ];
   
   // Intenta cada ruta
@@ -28,7 +27,6 @@ const findChrome = () => {
     }
   }
   
-  // Si no se encuentra, devuelve null
   console.error('❌ No se encontró Chrome en ninguna ubicación conocida');
   return null;
 };
@@ -63,7 +61,6 @@ app.get("/api/search", async (req, res) => {
         const page = await browser.newPage();
         const searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(category)}+in+${encodeURIComponent(city)}`;
         
-        // Aumentar el timeout para entornos con recursos limitados
         await page.goto(searchUrl, { 
             waitUntil: "domcontentloaded",
             timeout: 60000 
