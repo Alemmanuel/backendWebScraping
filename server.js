@@ -1,21 +1,18 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
-const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
-
 app.get("/api/search", async (req, res) => {
     const { category, city } = req.query;
+
     if (!category || !city) {
-        return res.status(400).json({ error: "Missing category or city" });
+        return res.status(400).json({ error: "Category and city are required" });
     }
 
     try {
-        // Usar Puppeteer sin `executablePath`
+        // Descargar Chromium si no está instalado
         const browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -27,25 +24,19 @@ app.get("/api/search", async (req, res) => {
         });
 
         const page = await browser.newPage();
-        let searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(category)}+in+${encodeURIComponent(city)}`;
-        await page.goto(searchUrl, { waitUntil: "networkidle2" });
-
-        await autoScroll(page);
+        const searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(category)}+in+${encodeURIComponent(city)}`;
+        await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
 
         const places = await page.evaluate(() => {
             return Array.from(document.querySelectorAll(".Nv2PK"))
                 .map(el => {
                     const nameEl = el.querySelector(".qBF1Pd") || el.querySelector("h3");
-                    const ratingEl = el.querySelector(".MW4etd");
-                    const priceEl = el.querySelector(".xg1aie, .rllt__details div:nth-child(2)");
                     const linkEl = el.querySelector("a");
 
                     const name = nameEl ? nameEl.innerText.trim() : "No name available";
-                    const rating = ratingEl ? ratingEl.innerText.split(" ")[0] : "No rating";
-                    const price = priceEl ? formatPrice(priceEl.innerText.trim()) : "N/A";
                     const link = linkEl ? linkEl.href : "#";
 
-                    return { name, rating, price, link };
+                    return { name, link };
                 })
                 .filter(business => business.link !== "#");
         });
@@ -59,32 +50,4 @@ app.get("/api/search", async (req, res) => {
     }
 });
 
-async function autoScroll(page) {
-    await page.evaluate(async () => {
-        await new Promise((resolve) => {
-            let totalHeight = 0;
-            let distance = 500;
-            const timer = setInterval(() => {
-                let scrollHeight = document.body.scrollHeight;
-                window.scrollBy(0, distance);
-                totalHeight += distance;
-                if (totalHeight >= scrollHeight) {
-                    clearInterval(timer);
-                    resolve();
-                }
-            }, 500);
-        });
-    });
-}
-
-function formatPrice(priceText) {
-    priceText = priceText.toLowerCase();
-    if (priceText.includes("$") || priceText.includes("cheap")) return "$";
-    if (priceText.includes("moderate") || priceText.includes("$$")) return "$$";
-    if (priceText.includes("expensive") || priceText.includes("$$$")) return "$$$";
-    return "Not Available";
-}
-
-app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
