@@ -12,7 +12,7 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Descargar Chromium si no está instalado
+        // Iniciar Puppeteer con Chromium propio
         const browser = await puppeteer.launch({
             headless: "new",
             args: [
