@@ -1,5 +1,6 @@
 const express = require("express");
-const puppeteer = require("puppeteer-core"); // Usamos `puppeteer-core` en lugar de `puppeteer`
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium"); // Nueva dependencia
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,13 +13,11 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Usar Chrome ya instalado en Vercel
         const browser = await puppeteer.launch({
-            executablePath: "/usr/bin/google-chrome-stable",
-            headless: "new",
+            executablePath: await chromium.executablePath(), // Ruta dinámica
+            headless: chromium.headless,
             args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
+                ...chromium.args,
                 "--disable-gpu",
                 "--disable-dev-shm-usage"
             ]
