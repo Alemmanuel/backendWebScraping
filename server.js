@@ -12,7 +12,7 @@ app.get("/api/search", async (req, res) => {
     }
 
     try {
-        // Iniciar Puppeteer asegurando que descargue Chromium correctamente
+        // Asegurar que Puppeteer descargue su propio Chromium
         const browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -52,4 +52,5 @@ app.get("/api/search", async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// Exportar `app` para Vercel
+module.exports = app;

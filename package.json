@@ -4,7 +4,8 @@
   "description": "Backend for web scraping with Puppeteer",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "npx puppeteer install"
   },
   "dependencies": {
     "express": "^4.21.2",
